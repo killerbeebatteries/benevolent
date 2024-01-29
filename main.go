@@ -34,7 +34,6 @@ func NewIRCBot(server, port, nickname, channel string) (*IRCBot, error) {
   // Perform IRC handshake and join the channel
   bot.sendRaw(fmt.Sprintf("NICK %s", nickname))
   bot.sendRaw(fmt.Sprintf("USER %s 0 * :%s", nickname, nickname))
-  bot.joinChannel(channel)
 
   return bot, nil
 }
@@ -64,6 +63,7 @@ func (b *IRCBot) receiveMessages() {
     // Add your message processing logic here
     // Example: check for PING messages and respond with PONG
     if strings.HasPrefix(message, "PING") {
+      fmt.Println("Sending: PONG " + message[5:])
       b.sendRaw("PONG " + message[5:])
     }
   }
@@ -83,7 +83,12 @@ func main() {
   }
   defer bot.conn.Close()
 
-  go bot.receiveMessages() // Start a goroutine to handle incoming messages
+  // Start a goroutine to handle incoming messages
+  go bot.receiveMessages()
+
+  // wait for 10 seconds before joining the channel
+  <-time.After(10 * time.Second)
+  bot.joinChannel(channel)
 
   // Example: Send a message to the channel every 10 seconds
   for {
