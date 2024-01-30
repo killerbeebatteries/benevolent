@@ -162,15 +162,31 @@ func main() {
   fmt.Printf("AMOC Phase: %s\n", product.Amoc.Phase)
 
   for _, area := range product.Forecast.Area {
-    fmt.Printf("\nArea: %s (%s)\n", area.Description, area.Type)
-    for _, period := range area.ForecastPeriod {
+    if area.Type == "location" && area.Description == "Charlotte Pass" {
+      fmt.Printf("\nArea: %s (%s)\n", area.Description, area.Type)
+      for _, period := range area.ForecastPeriod {
         fmt.Printf("  Period: %s to %s\n", period.StartTimeLocal, period.EndTimeLocal)
         for _, elem := range period.Element {
+          if elem.Type == "air_temperature_minimum" {
             fmt.Printf("    Element Type: %s, Value: %s %s\n", elem.Type, elem.Text, elem.Units)
+          }
+          if elem.Type == "air_temperature_maximum" {
+            fmt.Printf("    Element Type: %s, Value: %s %s\n", elem.Type, elem.Text, elem.Units)
+          }
+          if elem.Type == "precipitation_range" {
+            fmt.Printf("    Element Type: %s, Value: %s %s\n", elem.Type, elem.Text, elem.Units)
+          }
+
         }
         for _, text := range period.Text {
+          if text.Type == "precis" {
             fmt.Printf("    Text Type: %s, Value: %s\n", text.Type, text.Text)
+          }
+          if text.Type == "probability_of_precipitation" {
+            fmt.Printf("    Text Type: %s, Value: %s\n", text.Type, text.Text)
+          }
         }
+      }
     }
   }
 }
