@@ -78,10 +78,17 @@ func (b *IRCBot) receiveMessages() {
       case ":!time":
         b.sendMessage(CHANNEL, time.Now().String())
       case ":!weather":
-        if forecast, err := handleWeather(); err != nil {
-          fmt.Println("Error getting weather:", err)
+        if len(strings.Split(message, " ")) > 4 {
+          location := strings.Join(strings.Split(message, " ")[4:], " ")
+          fmt.Println("Checking weather for location:", location)
+
+          if forecast, err := handleWeather(location); err != nil {
+            fmt.Println("Error getting weather:", err)
+          } else {
+            b.sendMessage(CHANNEL, forecast)
+          }
         } else {
-          b.sendMessage(CHANNEL, forecast)
+          b.sendMessage(CHANNEL, "Usage: !weather <location>")
         }
         // case ":!quit":
         //   b.sendMessage(CHANNEL, "Bye!")
