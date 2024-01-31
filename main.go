@@ -51,6 +51,8 @@ func (b *IRCBot) joinChannel(channel string) {
 // sendMessage sends a message to a specified IRC channel.
 func (b *IRCBot) sendMessage(channel, message string) {
   b.sendRaw(fmt.Sprintf("PRIVMSG %s :%s", channel, message))
+  // throttle messages to avoid being kicked
+  time.Sleep(200 * time.Millisecond)
 }
 
 // receiveMessages continuously reads and processes messages from the IRC server.
@@ -85,7 +87,10 @@ func (b *IRCBot) receiveMessages() {
           if forecast, err := handleWeather(location); err != nil {
             fmt.Println("Error getting weather:", err)
           } else {
-            b.sendMessage(CHANNEL, forecast)
+            fmt.Println("Sending weather forecast:", forecast)
+            for _, line := range forecast {
+              b.sendMessage(CHANNEL, line)
+            }
           }
         } else {
           b.sendMessage(CHANNEL, "Usage: !weather <location>")
