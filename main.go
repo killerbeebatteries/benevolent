@@ -22,7 +22,7 @@ type IRCBot struct {
 }
 
 // NewIRCBot creates a new instance of IRCBot.
-func NewIRCBot(server, port, nickname, channel string) (*IRCBot, error) {
+func NewIRCBot(server, port, nickname string) (*IRCBot, error) {
   // Establish a TCP connection to the IRC server
   conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", server, port))
   if err != nil {
@@ -51,6 +51,8 @@ func (b *IRCBot) joinChannel(channel string) {
 // sendMessage sends a message to a specified IRC channel.
 func (b *IRCBot) sendMessage(channel, message string) {
   b.sendRaw(fmt.Sprintf("PRIVMSG %s :%s", channel, message))
+  // throttle messages to avoid being kicked
+  time.Sleep(200 * time.Millisecond)
 }
 
 // receiveMessages continuously reads and processes messages from the IRC server.
@@ -66,20 +68,49 @@ func (b *IRCBot) receiveMessages() {
       fmt.Println("Sending: PONG " + message[5:])
       b.sendRaw("PONG " + message[5:])
     }
+
+    // case statement for commands
+    if strings.Contains(message, "PRIVMSG") {
+      command := strings.Split(message, " ")[3]
+      switch command {
+      case ":!hello":
+        b.sendMessage(CHANNEL, "Hello, world!")
+      case ":!ping":
+        b.sendMessage(CHANNEL, "pong")
+      case ":!time":
+        b.sendMessage(CHANNEL, time.Now().String())
+      case ":!weather":
+        if len(strings.Split(message, " ")) > 4 {
+          location := strings.Join(strings.Split(message, " ")[4:], " ")
+          fmt.Println("Checking weather for location:", location)
+
+          if forecast, err := handleWeather(location); err != nil {
+            fmt.Println("Error getting weather:", err)
+          } else {
+            fmt.Println("Sending weather forecast:", forecast)
+            for _, line := range forecast {
+              b.sendMessage(CHANNEL, line)
+            }
+          }
+        } else {
+          b.sendMessage(CHANNEL, "Usage: !weather <location>")
+        }
+        // case ":!quit":
+        //   b.sendMessage(CHANNEL, "Bye!")
+        //   b.sendRaw("QUIT")
+        //   b.conn.Close()
+        //   return
+      }
+    }
   }
 }
 
 func main() {
-  // Replace these with your IRC server details
-  server := CONN_HOST
-  port := CONN_PORT
-  nickname := BOT_NAME
-  channel := CHANNEL
 
-  bot, err := NewIRCBot(server, port, nickname, channel)
+  bot, err := NewIRCBot(CONN_HOST, CONN_PORT, BOT_NAME)
   if err != nil {
-    fmt.Println("Error creating IRC bot:", err)
-    return
+   fmt.Println("Error creating IRC bot:", err)
+   return
   }
   defer bot.conn.Close()
 
@@ -88,11 +119,11 @@ func main() {
 
   // wait for 10 seconds before joining the channel
   <-time.After(10 * time.Second)
-  bot.joinChannel(channel)
+  bot.joinChannel(CHANNEL)
 
   // Example: Send a message to the channel every 10 seconds
   for {
-    bot.sendMessage(channel, "Hello, IRC!")
-    <-time.After(10 * time.Second)
+   bot.sendMessage(CHANNEL, "Hello, IRC!")
+   <-time.After(10 * time.Second)
   }
 }
