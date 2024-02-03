@@ -57,7 +57,8 @@ CREATE TABLE public.relay_messages (
     from_user character varying(64),
     to_user character varying(64),
     description text,
-    url character varying(4096)
+    url character varying(4096),
+    suggested_url character varying(4096)
 );
 
 
@@ -137,49 +138,49 @@ ALTER TABLE ONLY public.relay_url
 -- Name: TABLE irc_users; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.irc_users TO benuser;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.irc_users TO benevolentuser;
 
 
 --
 -- Name: SEQUENCE irc_users_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.irc_users_id_seq TO benuser;
+GRANT ALL ON SEQUENCE public.irc_users_id_seq TO benevolentuser;
 
 
 --
 -- Name: TABLE relay_messages; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.relay_messages TO benuser;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.relay_messages TO benevolentuser;
 
 
 --
 -- Name: SEQUENCE relay_messages_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.relay_messages_id_seq TO benuser;
+GRANT ALL ON SEQUENCE public.relay_messages_id_seq TO benevolentuser;
 
 
 --
 -- Name: TABLE relay_url; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.relay_url TO benuser;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE public.relay_url TO benevolentuser;
 
 
 --
 -- Name: SEQUENCE relay_url_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.relay_url_id_seq TO benuser;
+GRANT ALL ON SEQUENCE public.relay_url_id_seq TO benevolentuser;
 
 
 --
--- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: benuser
+-- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: benevolentuser
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE benuser IN SCHEMA public GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO benuser;
+ALTER DEFAULT PRIVILEGES FOR ROLE benevolentuser IN SCHEMA public GRANT SELECT,INSERT,DELETE,UPDATE ON TABLES  TO benevolentuser;
 
 
 --
