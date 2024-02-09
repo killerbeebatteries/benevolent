@@ -30,38 +30,38 @@ func saveRelayMessage(message relayMessage) error {
 }
 
 func markRelayMessageAsSent(id int) error {
-  _, err := DB.Exec("UPDATE relay_messages SET was_relayed = true WHERE id = $1", id)
+	_, err := DB.Exec("UPDATE relay_messages SET was_relayed = true WHERE id = $1", id)
 
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 func getRelayMessages() ([]relayMessage, error) {
-  var messages []relayMessage
+	var messages []relayMessage
 
-  rows, err := DB.Query("SELECT id, timestamp, from_user, to_user, description, suggested_url FROM relay_messages WHERE was_relayed = false)
+	rows, err := DB.Query("SELECT id, timestamp, from_user, to_user, description, suggested_url FROM relay_messages WHERE was_relayed = false")
 
-  if err != nil {
-    return nil, err
-  }
+	if err != nil {
+		return nil, err
+	}
 
-  defer rows.Close()
+	defer rows.Close()
 
-  for rows.Next() {
-    var message relayMessage
-    err := rows.Scan(&message.Id, &message.Timestamp, &message.FromUser, &message.ToUser, &message.Description, &message.URL)
+	for rows.Next() {
+		var message relayMessage
+		err := rows.Scan(&message.Id, &message.Timestamp, &message.FromUser, &message.ToUser, &message.Description, &message.URL)
 
-    if err != nil {
-      return nil, err
-    }
+		if err != nil {
+			return nil, err
+		}
 
-    messages = append(messages, message)
-  }
+		messages = append(messages, message)
+	}
 
-  return messages, nil
+	return messages, nil
 }
 
 func isValidURL(inputURL string) bool {
@@ -79,9 +79,8 @@ func isValidURL(inputURL string) bool {
 }
 
 func isUserInChannel(user string, channel string, message string) bool {
-  return true
+	return true
 }
-
 
 func getHelp() []string {
 
@@ -111,14 +110,14 @@ func addRelayMessage(message string) ([]string, error) {
 	description = strings.TrimRight(description, "\r\n")
 
 	if !isValidURL(url) {
-    response = append(response, "URL appears to be invalid: " + url)
+		response = append(response, "URL appears to be invalid: "+url)
 		return response, nil
 	}
 
-  if isUserInChannel(toUser, channel, message) {
-    response = append(response, fmt.Sprintf("User %s is in the channel. Maybe they could just read this message? :D", toUser))
-    return response, nil
-  }
+	if isUserInChannel(toUser, channel, message) {
+		response = append(response, fmt.Sprintf("User %s is in the channel. Maybe they could just read this message? :D", toUser))
+		return response, nil
+	}
 
 	record := relayMessage{
 		Timestamp:   time.Now(),
@@ -138,7 +137,7 @@ func addRelayMessage(message string) ([]string, error) {
 	fmt.Println("Saving message to database")
 	if err := saveRelayMessage(record); err != nil {
 		fmt.Println("Error saving message to database: ", err)
-    response = append(response, "Error saving message to database")
+		response = append(response, "Error saving message to database")
 		return response, err
 	}
 
@@ -154,26 +153,26 @@ func addRelayMessage(message string) ([]string, error) {
 }
 
 func sendRelayMessage(toUser string) ([]string, error) {
-  if messages, err := getRelayMessages(); err != nil {
-    return "Error retrieving messages.", err
-  }
+	if messages, err := getRelayMessages(); err != nil {
+		return "Error retrieving messages.", err
+	}
 
-  var response []string
+	var response []string
 
-  for _, message := range messages {
-    if message.ToUser == toUser {
-      response = append(response, fmt.Sprintf("%s: %s %s", message.FromUser, message.Description, message.URL))
-      if err := markRelayMessageAsSent(message.Id); err != nil {
-        return "Error marking message as sent.", err
-      }
-    }  
-  } 
+	for _, message := range messages {
+		if message.ToUser == toUser {
+			response = append(response, fmt.Sprintf("%s: %s %s", message.FromUser, message.Description, message.URL))
+			if err := markRelayMessageAsSent(message.Id); err != nil {
+				return "Error marking message as sent.", err
+			}
+		}
+	}
 
-  if len(response) == 0 {
-    response = append(response, fmt.Sprint("Hello %s. I have no pending messages for you.", toUser))
-  }
+	if len(response) == 0 {
+		response = append(response, fmt.Sprint("Hello %s. I have no pending messages for you.", toUser))
+	}
 
-  return response, nil
+	return response, nil
 
 }
 
