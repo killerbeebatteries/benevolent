@@ -78,7 +78,7 @@ func isValidURL(inputURL string) bool {
 }
 
 func isUserInChannel(user string, channel string, message string) bool {
-  // TODO
+	// TODO
 	return false
 }
 
@@ -155,17 +155,17 @@ func addRelayMessage(message string) ([]string, error) {
 func sendRelayMessage(toUser string) ([]string, error) {
 	var response []string
 
-  err := OpenDatabase()
+	err := OpenDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	defer CloseDatabase()
 
-  messages, err := getRelayMessages()
+	messages, err := getRelayMessages()
 
-  if err != nil {
-    response = []string{"Error retrieving messages."}
+	if err != nil {
+		response = []string{"Error retrieving messages."}
 		return response, err
 	}
 
@@ -173,7 +173,7 @@ func sendRelayMessage(toUser string) ([]string, error) {
 		if message.ToUser == toUser {
 			response = append(response, fmt.Sprintf("%s: %s %s", message.FromUser, message.Description, message.URL))
 			if err := markRelayMessageAsSent(message.Id); err != nil {
-        response = []string{"Error marking message as sent."}
+				response = []string{"Error marking message as sent."}
 				return response, err
 			}
 		}
@@ -199,11 +199,11 @@ func main() {
 
 	fmt.Println(response)
 
-  if response, err := sendRelayMessage("bob"); err != nil {
-    fmt.Println("Error: ", err)
-  } else {
-    fmt.Println(response)
-  }
+	if response, err := sendRelayMessage("bob"); err != nil {
+		fmt.Println("Error: ", err)
+	} else {
+		fmt.Println(response)
+	}
 
 	// TODO
 	// - Implement monitoring of the channel for the user and send the message to the user
