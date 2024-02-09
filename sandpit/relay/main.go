@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -79,7 +78,8 @@ func isValidURL(inputURL string) bool {
 }
 
 func isUserInChannel(user string, channel string, message string) bool {
-	return true
+  // TODO
+	return false
 }
 
 func getHelp() []string {
@@ -153,23 +153,34 @@ func addRelayMessage(message string) ([]string, error) {
 }
 
 func sendRelayMessage(toUser string) ([]string, error) {
-	if messages, err := getRelayMessages(); err != nil {
-		return "Error retrieving messages.", err
+	var response []string
+
+  err := OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	var response []string
+	defer CloseDatabase()
+
+  messages, err := getRelayMessages()
+
+  if err != nil {
+    response = []string{"Error retrieving messages."}
+		return response, err
+	}
 
 	for _, message := range messages {
 		if message.ToUser == toUser {
 			response = append(response, fmt.Sprintf("%s: %s %s", message.FromUser, message.Description, message.URL))
 			if err := markRelayMessageAsSent(message.Id); err != nil {
-				return "Error marking message as sent.", err
+        response = []string{"Error marking message as sent."}
+				return response, err
 			}
 		}
 	}
 
 	if len(response) == 0 {
-		response = append(response, fmt.Sprint("Hello %s. I have no pending messages for you.", toUser))
+		response = append(response, fmt.Sprintf("Hello %s. I have no pending messages for you.", toUser))
 	}
 
 	return response, nil
@@ -187,6 +198,12 @@ func main() {
 	}
 
 	fmt.Println(response)
+
+  if response, err := sendRelayMessage("bob"); err != nil {
+    fmt.Println("Error: ", err)
+  } else {
+    fmt.Println(response)
+  }
 
 	// TODO
 	// - Implement monitoring of the channel for the user and send the message to the user
