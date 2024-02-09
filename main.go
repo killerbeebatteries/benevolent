@@ -120,11 +120,18 @@ func (b *IRCBot) receiveMessages() {
 				} else {
 					b.sendMessage(CHANNEL, "Usage: !weather <location>")
 				}
-				// case ":!quit":
-				//   b.sendMessage(CHANNEL, "Bye!")
-				//   b.sendRaw("QUIT")
-				//   b.conn.Close()
-				//   return
+      case ":!relay_url":
+        if len(strings.Split(message, " ")) > 4 {
+          if resp, err := addRelayMessage(message); err != nil {
+            fmt.Println("Error relaying url:", err)
+          } 
+          b.sendMessage(CHANNEL, resp)
+        }
+      // case ":!quit":
+      //   b.sendMessage(CHANNEL, "Bye!")
+      //   b.sendRaw("QUIT")
+      //   b.conn.Close()
+      //   return
 			}
 		}
 	}

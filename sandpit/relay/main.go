@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -17,7 +18,7 @@ type relayMessage struct {
 	URL         string
 }
 
-func saveMessage(message relayMessage) error {
+func saveRelayMessage(message relayMessage) error {
 	_, err := DB.Exec("INSERT INTO relay_messages (timestamp, from_user, to_user, description, suggested_url) VALUES ($1, $2, $3, $4, $5)", message.Timestamp, message.FromUser, message.ToUser, message.Description, message.URL)
 
 	if err != nil {
@@ -26,6 +27,41 @@ func saveMessage(message relayMessage) error {
 
 	return nil
 
+}
+
+func markRelayMessageAsSent(id int) error {
+  _, err := DB.Exec("UPDATE relay_messages SET was_relayed = true WHERE id = $1", id)
+
+  if err != nil {
+    return err
+  }
+
+  return nil
+}
+
+func getRelayMessages() ([]relayMessage, error) {
+  var messages []relayMessage
+
+  rows, err := DB.Query("SELECT id, timestamp, from_user, to_user, description, suggested_url FROM relay_messages WHERE was_relayed = false)
+
+  if err != nil {
+    return nil, err
+  }
+
+  defer rows.Close()
+
+  for rows.Next() {
+    var message relayMessage
+    err := rows.Scan(&message.Id, &message.Timestamp, &message.FromUser, &message.ToUser, &message.Description, &message.URL)
+
+    if err != nil {
+      return nil, err
+    }
+
+    messages = append(messages, message)
+  }
+
+  return messages, nil
 }
 
 func isValidURL(inputURL string) bool {
@@ -42,6 +78,11 @@ func isValidURL(inputURL string) bool {
 	return true
 }
 
+func isUserInChannel(user string, channel string, message string) bool {
+  return true
+}
+
+
 func getHelp() []string {
 
 	var help []string
@@ -52,20 +93,14 @@ func getHelp() []string {
 	return help
 }
 
-func relayUrlMessage(message string) ([]string, error) {
-	err := OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
+func addRelayMessage(message string) ([]string, error) {
 
-	defer CloseDatabase()
+	var fromUser, toUser, channel, description, url string
+	var response []string
 
 	messageSlice := strings.Split(message, " ")
 
 	help := getHelp()
-
-	var fromUser, toUser, channel, description, url string
-	var response []string
 
 	fromUser = strings.Split(messageSlice[0], "!")[0]
 	fromUser = strings.TrimLeft(fromUser, ":")
@@ -76,8 +111,14 @@ func relayUrlMessage(message string) ([]string, error) {
 	description = strings.TrimRight(description, "\r\n")
 
 	if !isValidURL(url) {
-		return help, fmt.Errorf("URL appears to be invalid: %s", url)
+    response = append(response, "URL appears to be invalid: " + url)
+		return response, nil
 	}
+
+  if isUserInChannel(toUser, channel, message) {
+    response = append(response, fmt.Sprintf("User %s is in the channel. Maybe they could just read this message? :D", toUser))
+    return response, nil
+  }
 
 	record := relayMessage{
 		Timestamp:   time.Now(),
@@ -87,10 +128,18 @@ func relayUrlMessage(message string) ([]string, error) {
 		URL:         url,
 	}
 
+	err := OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer CloseDatabase()
+
 	fmt.Println("Saving message to database")
-	if err := saveMessage(record); err != nil {
+	if err := saveRelayMessage(record); err != nil {
 		fmt.Println("Error saving message to database: ", err)
-		return nil, err
+    response = append(response, "Error saving message to database")
+		return response, err
 	}
 
 	fmt.Println("From User: ", fromUser)
@@ -104,11 +153,35 @@ func relayUrlMessage(message string) ([]string, error) {
 
 }
 
+func sendRelayMessage(toUser string) ([]string, error) {
+  if messages, err := getRelayMessages(); err != nil {
+    return "Error retrieving messages.", err
+  }
+
+  var response []string
+
+  for _, message := range messages {
+    if message.ToUser == toUser {
+      response = append(response, fmt.Sprintf("%s: %s %s", message.FromUser, message.Description, message.URL))
+      if err := markRelayMessageAsSent(message.Id); err != nil {
+        return "Error marking message as sent.", err
+      }
+    }  
+  } 
+
+  if len(response) == 0 {
+    response = append(response, fmt.Sprint("Hello %s. I have no pending messages for you.", toUser))
+  }
+
+  return response, nil
+
+}
+
 func main() {
 
 	testMessage := ":alice!unknown@localhost PRIVMSG #channel :!relay_url bob https://www.youtube.com/watch?v=2XzmNpacpvk Interesting video"
 
-	response, err := relayUrlMessage(testMessage)
+	response, err := addRelayMessage(testMessage)
 
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -117,7 +190,6 @@ func main() {
 	fmt.Println(response)
 
 	// TODO
-	// - Implement the help message
 	// - Implement monitoring of the channel for the user and send the message to the user
 	// - Mark the message as sent
 
