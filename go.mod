@@ -2,7 +2,10 @@ module main
 
 go 1.20
 
-require github.com/jlaffaye/ftp v0.2.0
+require (
+	github.com/jlaffaye/ftp v0.2.0
+	github.com/lib/pq v1.10.9
+)
 
 require (
 	github.com/hashicorp/errwrap v1.0.0 // indirect
