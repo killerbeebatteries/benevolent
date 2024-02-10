@@ -58,7 +58,8 @@ CREATE TABLE public.relay_messages (
     to_user character varying(64),
     description text,
     suggested_url character varying(4096),
-    was_relayed boolean DEFAULT false
+    was_relayed boolean DEFAULT false,
+    from_channel character varying(512)
 );
 
 
