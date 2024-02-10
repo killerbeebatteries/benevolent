@@ -148,6 +148,9 @@ func addRelayMessage(message string) ([]string, error) {
 	fmt.Println("URL: ", url)
 	fmt.Println("Help: ", help)
 
+  if len(response) == 0 {
+    response = append(response, fmt.Sprintf("Message saved for %s. I will relay it the next time they are kicing around here.", toUser))
+  }
 	return response, nil
 
 }
@@ -207,6 +210,6 @@ func main() {
 
 	// TODO
 	// - Implement monitoring of the channel for the user and send the message to the user
-	// - Mark the message as sent
+  // - Implement checking the channel to see if user is present
 
 }

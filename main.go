@@ -87,6 +87,8 @@ func (b *IRCBot) receiveMessages() {
 		message := scanner.Text()
 		fmt.Println("Received:", message)
 
+    event := strings.Split(message, " ")[1]
+
 		// Add your message processing logic here
 		// Example: check for PING messages and respond with PONG
 		if strings.HasPrefix(message, "PING") {
@@ -94,8 +96,24 @@ func (b *IRCBot) receiveMessages() {
 			b.sendRaw("PONG " + message[5:])
 		}
 
+    if event == "JOIN" {
+      user := getUserFromMessage(message)
+
+      if user != BOT_NAME {
+        resp, err := sendRelayMessage(user)
+
+        if err != nil {
+          fmt.Println("Error sending relay message:", err)
+        }
+
+        for _, line := range resp {
+          b.sendMessage(CHANNEL, line)
+        }
+      }
+    }
+
 		// case statement for commands
-		if strings.Contains(message, "PRIVMSG") {
+		if event == "PRIVMSG" {
 			command := strings.Split(message, " ")[3]
 			switch command {
 			case ":!hello":
@@ -118,15 +136,32 @@ func (b *IRCBot) receiveMessages() {
 						}
 					}
 				} else {
-					b.sendMessage(CHANNEL, "Usage: !weather <location>")
+          resp, err := getHelp("weather")
+          if err != nil {
+            fmt.Println("Error retrieving help for weather: ", err)
+          } 
+          for _, line := range resp {
+            b.sendMessage(CHANNEL, line)
+          }
 				}
       case ":!relay_url":
         if len(strings.Split(message, " ")) > 4 {
-          if resp, err := addRelayMessage(message); err != nil {
-            fmt.Println("Error relaying url:", err)
+          resp, err := addRelayMessage(message)
+          if err != nil {
+            fmt.Println("Error adding relay message:", err)
           } 
-          b.sendMessage(CHANNEL, resp)
-        }
+          for _, line := range resp {
+            b.sendMessage(CHANNEL, line)
+          }
+				} else {
+          resp, err := getHelp("relay_url")
+          if err != nil {
+            fmt.Println("Error retrieving help for relay url messages:", err)
+          } 
+          for _, line := range resp {
+            b.sendMessage(CHANNEL, line)
+          }
+				}
       // case ":!quit":
       //   b.sendMessage(CHANNEL, "Bye!")
       //   b.sendRaw("QUIT")
@@ -153,9 +188,14 @@ func main() {
 	<-time.After(10 * time.Second)
 	bot.joinChannel(CHANNEL)
 
+  // keep channel alive.
+  // TODO: This is likely a bit of a hack. There's probably a better way to do this.
+  for {
+	  <-time.After(10 * time.Second)
+  }
 	// Example: Send a message to the channel every 10 seconds
-	for {
-		bot.sendMessage(CHANNEL, "Hello, IRC!")
-		<-time.After(10 * time.Second)
-	}
+	// for {
+	// 	bot.sendMessage(CHANNEL, "Hello, IRC!")
+	// 	<-time.After(10 * time.Second)
+	// }
 }
