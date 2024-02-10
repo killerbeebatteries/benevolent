@@ -1,0 +1,16 @@
+# you can use the following command to export these envs:
+# source example.envs
+export CHANNEL="#lurking"
+export CHANNEL_PASSWORD="somethingclever"
+export TRUSTED_USERS="myfriend, myotherfriend, myfriendsfriend"
+export FTP_SERVER="ftp.bom.gov.au"
+export FTP_FILE_PATH="/anon/gen/fwo/"
+# NSW
+export FTP_FILE_NAME="IDN11060.xml"
+export FTP_USER="anonymous"
+export FTP_PASSWORD="anonymous"
+export DB_HOST="hostname_or_ip"
+export DB_PORT="5432"
+export DB_NAME="benevolent"
+export DB_USER="benevolentuser"
+export DB_PASSWORD="apasswordisetearlier"
