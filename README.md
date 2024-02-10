@@ -22,3 +22,22 @@ I do recommend the journey though. It's been good to learn how to handle network
 - ~~add allow list to control certain functionality~~
 - ~~implement using a registered user~~
 - Get trusted users from the database, rather than an env file.
+
+# Build
+
+```
+docker-compose build
+```
+
+# Run
+
+We use docker-compose in combination with a `.env` file with our values. See the `env.example` file for an example of the values you can use.
+
+```
+docker-compose up
+```
+
+To stop, you can hit `ctrl-c` 
+
+More info on [docker-compose](ihttps://docs.docker.com/compose/).
+

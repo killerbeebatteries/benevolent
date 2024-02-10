@@ -17,4 +17,4 @@ FROM alpine:latest as prod
 
 WORKDIR /app
 COPY --from=built /tmp/irc-bot /usr/bin/irc-bot
-CMD ["/usr/bin/api-server"]
+CMD ["/usr/bin/irc-bot"]
