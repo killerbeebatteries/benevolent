@@ -1,0 +1,23 @@
+---
+version: '3.8'
+services:
+  irc-bot:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    environment:
+      - CHANNEL=${CHANNEL}
+      - CHANNEL_PASSWORD=${CHANNEL_PASSWORD}
+      - NICKSERV_PASSWORD=${NICKSERV_PASSWORD}
+      - TRUSTED_USERS=${TRUSTED_USERS}
+      - FTP_SERVER=${FTP_SERVER}
+      - FTP_FILE_PATH=${FTP_FILE_PATH}
+      - FTP_FILE_NAME=${FTP_FILE_NAME}
+      - FTP_USER=${FTP_USER}
+      - FTP_PASSWORD=${FTP_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}

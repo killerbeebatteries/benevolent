@@ -111,11 +111,11 @@ func (b *IRCBot) receiveMessages() {
 		fmt.Println("Received:", message)
 
 		event := strings.Split(message, " ")[1]
-		user := getUserFromMessage(message)
+		user := strings.ToLower(getUserFromMessage(message))
 		userIsTrusted := false
 
 		for _, line := range TRUSTED_USERS {
-			if user == line {
+			if strings.EqualFold(user, line) {
 				userIsTrusted = true
 			}
 		}

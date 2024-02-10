@@ -48,7 +48,8 @@ func getRelayMessageFromCommand(message string) (relayMessage, error) {
 
 	fromUser = strings.Split(messageSlice[0], "!")[0]
 	fromUser = strings.TrimLeft(fromUser, ":")
-	toUser = messageSlice[4]
+	fromUser = strings.ToLower(fromUser)
+	toUser = strings.ToLower(messageSlice[4])
 	channel = strings.Split(messageSlice[2], "!")[0]
 	url = strings.Split(messageSlice[5], " ")[0]
 	description = strings.Join(messageSlice[6:], " ")
