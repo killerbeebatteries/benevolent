@@ -2,7 +2,7 @@
 # source example.envs
 export CHANNEL="#lurking"
 export CHANNEL_PASSWORD="somethingclever"
-export TRUSTED_USERS="myfriend, myotherfriend, myfriendsfriend"
+export TRUSTED_USERS="myfriend,myotherfriend,myfriendsfriend"
 export FTP_SERVER="ftp.bom.gov.au"
 export FTP_FILE_PATH="/anon/gen/fwo/"
 # NSW
