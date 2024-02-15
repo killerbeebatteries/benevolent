@@ -168,7 +168,7 @@ func sendRelayMessage(toUser string) ([]string, error) {
 	}
 
 	if len(response) == 0 {
-		response = append(response, fmt.Sprintf("Hello %s. I have no pending messages for you.", toUser))
+		response = append(response, "I have no pending messages for you.")
 	}
 
 	return response, nil
