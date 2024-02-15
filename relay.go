@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
   "errors"
@@ -134,13 +133,6 @@ func addRelayMessage(message string) ([]string, error) {
 		return response, nil
 	}
 
-	err = OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer CloseDatabase()
-
 	fmt.Println("Saving message to database")
 	if err := saveRelayMessage(record); err != nil {
 		fmt.Println("Error saving message to database: ", err)
@@ -157,13 +149,6 @@ func addRelayMessage(message string) ([]string, error) {
 
 func sendRelayMessage(toUser string) ([]string, error) {
 	var response []string
-
-	err := OpenDatabase()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer CloseDatabase()
 
 	messages, err := getRelayMessages()
 

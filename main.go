@@ -130,6 +130,16 @@ func (b *IRCBot) receiveMessages() {
 		if event == "JOIN" {
 
 			if user != BOT_NAME {
+				resp, err := getGreetings(user)
+
+				if err != nil {
+					fmt.Println("Error retrieving greeting message:", err)
+				}
+
+				b.sendMessage(CHANNEL, resp)
+			}
+
+			if user != BOT_NAME {
 				resp, err := sendRelayMessage(user)
 
 				if err != nil {
@@ -207,6 +217,13 @@ func (b *IRCBot) receiveMessages() {
 }
 
 func main() {
+
+	err := OpenDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer CloseDatabase()
 
 	CHANNEL := os.Getenv("CHANNEL")
 	CHANNEL_PASSWORD := ""
