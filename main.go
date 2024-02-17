@@ -203,6 +203,25 @@ func (b *IRCBot) receiveMessages() {
 							b.sendMessage(CHANNEL, line)
 						}
 					}
+				case ":!help":
+					if len(strings.Split(message, " ")) > 4 {
+            feature := strings.Split(message, " ")[4]
+            resp, err := getHelp(feature)
+						if err != nil {
+							fmt.Println("Error retrieving help message:", err)
+						}
+						for _, line := range resp {
+							b.sendMessage(CHANNEL, line)
+						}
+					} else {
+						resp, err := getHelp("")
+						if err != nil {
+							fmt.Println("Error retrieving general help message:", err)
+						}
+						for _, line := range resp {
+							b.sendMessage(CHANNEL, line)
+						}
+					}
 					// case ":!quit":
 					//   b.sendMessage(CHANNEL, "Bye!")
 					//   b.sendRaw("QUIT")
